@@ -1,6 +1,6 @@
 # SnowflakeCompress
 
-This is a test harness to facilitate experimenting with compressing blocks of snowflake IDs. It creates a block of snowflake IDs, runs it through various processing pipelines, and outputs a CSV containing the size of the resulting byte block.
+This is a test harness to facilitate experimenting with compressing blocks of [snowflake IDs](https://en.wikipedia.org/wiki/Snowflake_ID). It creates a block of snowflake IDs, runs it through various processing pipelines, and outputs a CSV containing the size of the resulting byte block.
 
 An [example results file](docs/results-3gen.xlsx) is included in this repository, along with some charts, to demonstrate the effectiveness of preconditioning the data before compressing it.
 
@@ -8,7 +8,7 @@ An [example results file](docs/results-3gen.xlsx) is included in this repository
 
 ## Pipelines
 
-As written, the test harness will compare the Gzip, Zlib, Snappy, LZ4, and Brotli compressors against each other.
+As written, the test harness will compare the [Zlib](https://en.wikipedia.org/wiki/Zlib), [Snappy](https://en.wikipedia.org/wiki/Snappy_(compression%29), [LZ4](https://en.wikipedia.org/wiki/LZ4_(compression_algorithm%29), and [Brotli](https://en.wikipedia.org/wiki/Brotli) compressors against each other.
  
 Some of the defined pipelines use a bitwise transposition (similar to [BitShuffle](https://github.com/kiyo-masui/bitshuffle) except performed over the entire block of IDs rather than on 8K chunks) to improve compressibility. When you consider each bit in an ID value, there tends to be a high degree of coherence across all of the IDs in a block. The reasons for this:
 
