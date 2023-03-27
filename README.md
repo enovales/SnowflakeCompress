@@ -10,15 +10,19 @@ An [example results file](docs/results-3gen.xlsx) is included in this repository
 
 As written, the test harness will compare the [Zlib](https://en.wikipedia.org/wiki/Zlib), [Snappy](https://en.wikipedia.org/wiki/Snappy_(compression)), [LZ4](https://en.wikipedia.org/wiki/LZ4_(compression_algorithm)), and [Brotli](https://en.wikipedia.org/wiki/Brotli) compressors against each other.
  
-Some of the defined pipelines use a bitwise transposition (similar to [BitShuffle](https://github.com/kiyo-masui/bitshuffle) except performed over the entire block of IDs rather than on 8K chunks) to improve compressibility. When you consider each bit in an ID value, there tends to be a high degree of coherence across all of the IDs in a block. The reasons for this:
+Some of the defined pipelines use a bitwise transposition (similar to [BitShuffle](https://github.com/kiyo-masui/bitshuffle) except performed over the entire block of IDs rather than on 8K chunks) to improve compressibility.
+
+The rationale for doing this is that when you consider each bit in an ID value, there tends to be a high degree of coherence across all of the IDs in a block. The reasons for this:
 
 * Timestamps within the defined epoch, even at millisecond resolution, will still have many common bits, when the ID values are sorted.
 * In practice, the number of ID generators in use for a production system tends to be low, so most generated IDs will have similar values here.
 * Similarly, unless a production system is generating IDs at an extremely high rate, most sequence numbers in the generated IDs will fall into one of a very small number of values.
 
-Apart from sorting on the entire ID value, and performing the bitwise transpose, this harness also demonstrates the effectiveness of bucketing IDs by their generator ID and sequence number. When all of this is performed, the performance-oriented LZ4 algorithm produces data whose size is within a couple of percentage points of what is produced by the comparatively slower Brotli algorithm.
+The transposition technique improves compressibility by ~15% for Brotli, and by nearly 45% for LZ4, so it should be considered essential for use with performance-oriented compressors like LZ4 and Snappy.
 
-These results suggest that, if you're transmitting large blocks of snowflake IDs, and want to use a performance-oriented compression algorithm like LZ4, preconditioning your data can give you compressed sizes comparable to the best general-purpose compressors.
+Apart from sorting on the entire ID value, and performing the bitwise transpose, this harness also demonstrates the effectiveness of bucketing IDs by their generator ID and sequence number. This saves another ~4.5% space. When all of these techniques are combined, the performance-oriented LZ4 algorithm produces data whose size is within a couple of percentage points of what is produced by the comparatively slower Brotli algorithm.
+
+These results suggest that, if you're transmitting large blocks of snowflake IDs, and want to use a performance-oriented compression algorithm like LZ4, preconditioning your data is the way to go. At a minimum, you should try to perform a BitShuffle-like transpose, and if you can spare the time to do so, use the generator ID and sequence number as additional sort keys.
 
 ## Configuration
 
